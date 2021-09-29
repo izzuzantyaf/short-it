@@ -25,15 +25,21 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 })
 
-app.get('/api/short_url/:id', async (req, res) => {
+app.get('/api/shorturl/:id', async (req, res) => {
   // get original url based on short url
   const { original_url } = await Url.findOne({ short_url: req.params.id }).exec()
   // redirect to original url
   res.redirect(original_url)
 })
 
-app.post('/api/short_url', async (req, res) => {
+app.post('/api/shorturl', async (req, res) => {
   const { original_url } = req.body
+  // check if url is valid
+  try {
+    const validUrl = new URL(original_url)
+  } catch (err) {
+    return res.json({ error: 'invalid url' })
+  }
   // check if url is already in database
   const data = await Url.findOne({ original_url: original_url }).exec()
   // if url doesn't exist, create new one
